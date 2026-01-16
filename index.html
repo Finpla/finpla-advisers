@@ -4,14 +4,477 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finpla – Adviser Directory</title>
+  <meta name="description" content="Search and filter advisers by region and services including mortgages, insurance, KiwiSaver and investing." />
+
   <style>
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:#f8f6f3;margin:0;padding:40px}
-    h1{color:#28A9D7;margin:0 0 12px}
-    p{max-width:720px;line-height:1.5}
+    :root{
+      --bg:#f8f6f3;
+      --card:#ffffff;
+      --text:#102a43;
+      --muted:#627d98;
+      --line:#e6e1d8;
+      --brand1:#4CEAAC;
+      --brand2:#28A9D7;
+      --shadow:0 10px 30px rgba(16,42,67,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 18px 60px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .brand{
+      display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:-.3px;
+      color:var(--brand2);
+    }
+    .sub{margin:0;color:var(--muted);font-size:14px}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;
+      color:var(--muted);font-size:13px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg,#ffffff 0%, #ffffff 60%, rgba(255,255,255,.6) 100%);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin:14px 0 18px;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 860px){
+      .controls{grid-template-columns:1fr}
+    }
+    .field label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+    }
+    .input, select{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+    }
+    .input:focus, select:focus{border-color:var(--brand2); box-shadow:0 0 0 3px rgba(40,169,215,.15)}
+    .checks{
+      display:flex;flex-wrap:wrap;gap:10px;
+      padding-top:6px;
+    }
+    .check{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      cursor:pointer;
+      user-select:none;
+      font-size:13px;
+      color:var(--text);
+    }
+    .check input{accent-color: var(--brand2)}
+    .actions{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;justify-content:space-between;align-items:center;
+    }
+    .btn{
+      border:0;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:600;
+      background:var(--brand2);color:#fff;
+    }
+    .btn.secondary{background:#fff;color:var(--brand2);border:1px solid rgba(40,169,215,.35)}
+    .count{color:var(--muted);font-size:13px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 640px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px 14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height: 170px;
+    }
+    .row{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .name{
+      font-size:16px;font-weight:800;line-height:1.2;margin:0;
+    }
+    .meta{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+    .tags{display:flex;flex-wrap:wrap;gap:8px}
+    .tag{
+      font-size:12px;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      background:#fff;
+    }
+    .tag.yes{border-color:rgba(76,234,172,.45); color:#0a6b4e; background:rgba(76,234,172,.12)}
+    .tag.no{border-color:rgba(98,125,152,.35); color:var(--muted)}
+    .footer{
+      margin-top:10px;
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center
+    }
+    .small{font-size:12px;color:var(--muted)}
+    a.link{color:var(--brand2);text-decoration:none;font-weight:700}
+    a.link:hover{text-decoration:underline}
+    .empty{
+      text-align:center;
+      padding:28px 10px;
+      color:var(--muted);
+    }
+    .error{
+      background:#fff;
+      border:1px solid #ffb3b3;
+      color:#8a1f1f;
+      padding:12px;
+      border-radius:12px;
+      margin:12px 0;
+    }
   </style>
 </head>
+
 <body>
-  <h1>Finpla Adviser Directory</h1>
-  <p>If you can see this page, GitHub Pages is serving <code>index.html</code> correctly.</p>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Finpla Adviser Directory</h1>
+        <p class="sub">Search and filter advisers by region and services.</p>
+      </div>
+      <div class="pill" id="statusPill">Loading advisers…</div>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <div class="field">
+          <label for="q">Search</label>
+          <input class="input" id="q" type="search" placeholder="Name, company, location, FSP number…" />
+        </div>
+
+        <div class="field">
+          <label for="region">Region</label>
+          <select id="region">
+            <option value="">All regions</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="type">Profile type</label>
+          <select id="type">
+            <option value="">All</option>
+            <option value="individual">Individual</option>
+            <option value="entity">Entity</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checks" style="margin-top:10px">
+        <label class="check"><input type="checkbox" id="mortgage" /> Mortgage</label>
+        <label class="check"><input type="checkbox" id="insurance" /> Insurance</label>
+        <label class="check"><input type="checkbox" id="kiwisaver" /> KiwiSaver</label>
+        <label class="check"><input type="checkbox" id="investment" /> Investment</label>
+      </div>
+
+      <div class="actions">
+        <div class="count" id="count">—</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn secondary" id="reset">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="error" class="error" style="display:none"></div>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">No advisers match your filters.</div>
+  </div>
+
+  <script>
+    // ---- Helpers
+    const toBool = (v) => {
+      if (typeof v === "boolean") return v;
+      if (v == null) return false;
+      const s = String(v).trim().toLowerCase();
+      return s === "true" || s === "yes" || s === "1";
+    };
+
+    const safe = (v) => (v == null ? "" : String(v));
+
+    const norm = (v) => safe(v).trim().toLowerCase();
+
+    // Try common field names you might have in your JSON
+    const get = (obj, keys, fallback="") => {
+      for (const k of keys) {
+        if (obj && obj[k] != null && obj[k] !== "") return obj[k];
+      }
+      return fallback;
+    };
+
+    const buildLocation = (a) => {
+      const suburb = get(a, ["suburb","Suburb"], "");
+      const city   = get(a, ["city","City","town","Town"], "");
+      const region = get(a, ["region","Region"], "");
+      const parts = [suburb, city, region].map(safe).map(s=>s.trim()).filter(Boolean);
+      return parts.join(", ");
+    };
+
+    const buildDisplayName = (a) => {
+      // prefer Trading Name, else Name, else Title
+      return get(a, ["tradingName","Trading Name","TradingName"], "") ||
+             get(a, ["name","Name"], "") ||
+             get(a, ["title","Title"], "");
+    };
+
+    const buildPersonName = (a) => {
+      // if you have "fullName" or "adviserName", include it under entity
+      return get(a, ["fullName","Full Name","adviserName","Adviser Name"], "") ||
+             get(a, ["name","Name"], "");
+    };
+
+    // ---- State
+    let advisers = [];
+    let filtered = [];
+
+    // ---- UI elements
+    const elGrid = document.getElementById("grid");
+    const elEmpty = document.getElementById("empty");
+    const elCount = document.getElementById("count");
+    const elStatus = document.getElementById("statusPill");
+    const elError = document.getElementById("error");
+
+    const qEl = document.getElementById("q");
+    const regionEl = document.getElementById("region");
+    const typeEl = document.getElementById("type");
+    const mortgageEl = document.getElementById("mortgage");
+    const insuranceEl = document.getElementById("insurance");
+    const kiwisaverEl = document.getElementById("kiwisaver");
+    const investmentEl = document.getElementById("investment");
+    const resetEl = document.getElementById("reset");
+
+    function setError(msg){
+      if(!msg){
+        elError.style.display = "none";
+        elError.textContent = "";
+        return;
+      }
+      elError.style.display = "block";
+      elError.textContent = msg;
+    }
+
+    function fillRegions(items){
+      const set = new Set();
+      items.forEach(a => {
+        const r = get(a, ["region","Region"], "");
+        if (safe(r).trim()) set.add(safe(r).trim());
+      });
+      const list = Array.from(set).sort((a,b)=>a.localeCompare(b));
+      list.forEach(r=>{
+        const opt = document.createElement("option");
+        opt.value = r;
+        opt.textContent = r;
+        regionEl.appendChild(opt);
+      });
+    }
+
+    function matchesFilters(a){
+      const q = norm(qEl.value);
+      const region = regionEl.value;
+      const type = typeEl.value;
+
+      const mortgage = mortgageEl.checked;
+      const insurance = insuranceEl.checked;
+      const kiwisaver = kiwisaverEl.checked;
+      const investment = investmentEl.checked;
+
+      // These booleans must match the keys in your JSON.
+      // Common possibilities:
+      const aMortgage  = toBool(get(a, ["mortgage","Mortgage","isMortgage","MortgageFlag"], false));
+      const aInsurance = toBool(get(a, ["insurance","Insurance","isInsurance","InsuranceFlag"], false));
+      const aKiwisaver  = toBool(get(a, ["kiwisaver","KiwiSaver","isKiwiSaver","KiwiSaverFlag"], false));
+      const aInvestment = toBool(get(a, ["investment","Investing","isInvestment","InvestmentFlag"], false));
+
+      if (region && get(a, ["region","Region"], "") !== region) return false;
+      if (type && norm(get(a, ["profileType","Profile Type","profile_type","type"], "")) !== norm(type)) return false;
+
+      if (mortgage && !aMortgage) return false;
+      if (insurance && !aInsurance) return false;
+      if (kiwisaver && !aKiwisaver) return false;
+      if (investment && !aInvestment) return false;
+
+      if (q){
+        const hay = [
+          buildDisplayName(a),
+          buildPersonName(a),
+          buildLocation(a),
+          get(a, ["fspNumber","FSP","fsp","FSPR - Reg Number","FSPRRegNumber","fspRegNumber"], ""),
+          get(a, ["serviceText","Services","servicesText"], "")
+        ].map(norm).join(" | ");
+        if (!hay.includes(q)) return false;
+      }
+
+      return true;
+    }
+
+    function render(){
+      filtered = advisers.filter(matchesFilters);
+
+      elCount.textContent = `${filtered.length.toLocaleString()} adviser${filtered.length===1?"":"s"} shown`;
+      elStatus.textContent = `${advisers.length.toLocaleString()} total`;
+
+      elGrid.innerHTML = "";
+      elEmpty.style.display = filtered.length ? "none" : "block";
+
+      filtered.slice(0, 300).forEach(a=>{
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const displayName = buildDisplayName(a);
+        const personName = buildPersonName(a);
+        const fsp = safe(get(a, ["fspNumber","FSP","fsp","FSPR - Reg Number","FSPRRegNumber","fspRegNumber"], "")).trim();
+        const location = buildLocation(a);
+
+        const profileType = safe(get(a, ["profileType","Profile Type","profile_type","type"], "")).trim();
+
+        const aMortgage  = toBool(get(a, ["mortgage","Mortgage","isMortgage","MortgageFlag"], false));
+        const aInsurance = toBool(get(a, ["insurance","Insurance","isInsurance","InsuranceFlag"], false));
+        const aKiwisaver  = toBool(get(a, ["kiwisaver","KiwiSaver","isKiwiSaver","KiwiSaverFlag"], false));
+        const aInvestment = toBool(get(a, ["investment","Investing","isInvestment","InvestmentFlag"], false));
+
+        const title = document.createElement("h3");
+        title.className = "name";
+        title.textContent = displayName || "(No name)";
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        meta.textContent = [
+          personName && personName !== displayName ? personName : "",
+          location ? location : "",
+          fsp ? `FSP: ${fsp}` : "",
+          profileType ? profileType : ""
+        ].filter(Boolean).join(" • ");
+
+        const tags = document.createElement("div");
+        tags.className = "tags";
+        tags.innerHTML = `
+          <span class="tag ${aMortgage ? "yes" : "no"}">Mortgage</span>
+          <span class="tag ${aInsurance ? "yes" : "no"}">Insurance</span>
+          <span class="tag ${aKiwisaver ? "yes" : "no"}">KiwiSaver</span>
+          <span class="tag ${aInvestment ? "yes" : "no"}">Investment</span>
+        `;
+
+        const footer = document.createElement("div");
+        footer.className = "footer";
+
+        // Optional: if your JSON has a profile slug
+        const slug = safe(get(a, ["profileSlug","slug","Slug"], "")).trim();
+        const link = document.createElement("div");
+        link.className = "small";
+
+        if (slug) {
+          // later we can build real adviser pages; for now link is just a placeholder anchor
+          link.innerHTML = `Profile: <a class="link" href="#${encodeURIComponent(slug)}">${slug}</a>`;
+        } else {
+          link.textContent = "Profile page coming soon";
+        }
+
+        const small = document.createElement("div");
+        small.className = "small";
+        small.textContent = "";
+
+        footer.appendChild(link);
+        footer.appendChild(small);
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(tags);
+        card.appendChild(footer);
+
+        elGrid.appendChild(card);
+      });
+
+      if (filtered.length > 300) {
+        const note = document.createElement("div");
+        note.className = "empty";
+        note.textContent = `Showing first 300 results. Add filters to narrow it down.`;
+        elGrid.appendChild(note);
+      }
+    }
+
+    function wire(){
+      const rerender = () => render();
+      qEl.addEventListener("input", rerender);
+      regionEl.addEventListener("change", rerender);
+      typeEl.addEventListener("change", rerender);
+      mortgageEl.addEventListener("change", rerender);
+      insuranceEl.addEventListener("change", rerender);
+      kiwisaverEl.addEventListener("change", rerender);
+      investmentEl.addEventListener("change", rerender);
+
+      resetEl.addEventListener("click", ()=>{
+        qEl.value = "";
+        regionEl.value = "";
+        typeEl.value = "";
+        mortgageEl.checked = false;
+        insuranceEl.checked = false;
+        kiwisaverEl.checked = false;
+        investmentEl.checked = false;
+        render();
+      });
+    }
+
+    async function init(){
+      setError("");
+
+      try{
+        // IMPORTANT: this file must exist in the repo.
+        const res = await fetch("./advisers.json", { cache: "no-store" });
+        if(!res.ok) throw new Error(`Could not load advisers.json (HTTP ${res.status}). Make sure it is committed in the repo root.`);
+        const data = await res.json();
+
+        // data can be an array, or {items:[...]} etc.
+        advisers = Array.isArray(data) ? data : (data.items || data.advisers || []);
+        if(!Array.isArray(advisers)) advisers = [];
+
+        elStatus.textContent = `${advisers.length.toLocaleString()} total`;
+        fillRegions(advisers);
+        wire();
+        render();
+
+      }catch(err){
+        elStatus.textContent = "Error";
+        setError(err.message || String(err));
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
