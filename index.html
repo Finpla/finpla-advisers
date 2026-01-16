@@ -1,50 +1,29 @@
-Goal: Fix the mortgage/insurance flags and generate a Wix-ready CSV from 20260105030306_fspr_data.json.
-Problem: Many obvious insurance advisers (e.g., “Adelphi Insurance Brokers Limited”) are being flagged insurance=false. The logic is too narrow (likely only checking serviceDescription/serviceCode/licenceCategories).
-
-Task: Update the transformation so each record builds a search_text string by concatenating and lowercasing ALL of the following (where present):
-
-fspName
-
-any trading/other names arrays (e.g. fspOtherNames or equivalent)
-
-organisation/registered/trading name fields (anything like organisationName / entityName)
-
-all service objects: serviceCode, serviceDescription, serviceType, serviceStatus, and any licenceCategories
-
-Then set flags using keyword matching against search_text:
-
-mortgage=true if it matches any of: mortgage, home loan, homeloan, lending, loan, borrow, refinance, broker, mortgage adviser, mortgage advisor
-
-insurance=true if it matches any of: insurance, insure, risk, life, health, trauma, income protection, ip insurance, mortgage protection, business insurance, general insurance, claims, brokerage, brokers, underwriting
-
-kiwisaver=true if it matches: kiwisaver, retirement, superannuation
-
-investment=true if it matches: investment, portfolio, wealth, financial planning, managed fund, funds
-
-Important rules:
-
-Only include providers with at least one active/licensed service status (keep your existing “active/licensed” filtering).
-
-Deduplicate by fspRegNumber (keep the most complete record).
-
-Output finpla_wix_directory.csv with clean columns suitable for Wix CMS import:
-
-fspRegNumber
-
-fspName
-
-primaryTradingName (best available)
-
-type (individual/entity)
-
-addressLine1, addressLine2, suburb, city, postcode, region
-
-mortgage, insurance, kiwisaver, investment (true/false)
-
-servicesText (pipe-delimited summary of service descriptions + codes)
-
-licenceCategoriesText (pipe-delimited)
-
-profileSlug (SEO-friendly slug based on name + FSP number)
-
-After generating, print: total rows, mortgage count, insurance count, kiwisaver count, investment count, and 10 example rows where insurance=true to verify it’s fixed.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Finpla – Adviser Directory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8f6f3;
+      margin: 0;
+      padding: 40px;
+    }
+    h1 {
+      color: #28A9D7;
+    }
+    p {
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Finpla Adviser Directory</h1>
+  <p>
+    This page is live via GitHub Pages.  
+    Next step: load adviser data and add search & filters.
+  </p>
+</body>
+</html>
